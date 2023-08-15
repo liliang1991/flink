@@ -87,7 +87,9 @@ public abstract class ResourceManagerFactory<T extends ResourceIDRetrievable> {
     public ResourceManager<T> createResourceManager(
             ResourceManagerProcessContext context, UUID leaderSessionId, ResourceID resourceId)
             throws Exception {
-
+        // TODO_LL : 创建两个基础组件
+        //         1：SlotManager 存在ResourceManager 中 用来管理集群的solt资源
+        //         2:JobLeaderIdService 管理jobmaster
         final ResourceManagerRuntimeServices resourceManagerRuntimeServices =
                 createResourceManagerRuntimeServices(
                         context.getRmRuntimeServicesConfig(),

@@ -209,7 +209,11 @@ public class HeartbeatManagerImpl<I, O> implements HeartbeatManager<I, O> {
         if (!stopped) {
             log.debug("Received heartbeat from {}.", heartbeatOrigin);
             reportHeartbeat(heartbeatOrigin);
+            /**
+             *  TODO_LL :Payload 就是负载
+             *           心跳请求中，有可能携带了负载汇报，如果有的话，则需要处理
 
+             */
             if (heartbeatPayload != null) {
                 heartbeatListener.reportPayload(heartbeatOrigin, heartbeatPayload);
             }
@@ -230,7 +234,7 @@ public class HeartbeatManagerImpl<I, O> implements HeartbeatManager<I, O> {
                 if (heartbeatPayload != null) {
                     heartbeatListener.reportPayload(requestOrigin, heartbeatPayload);
                 }
-
+                // TODO_LL : 地位低的组件接受到了地位高的rpc 请求处理完之后返回响应
                 heartbeatTarget
                         .receiveHeartbeat(
                                 getOwnResourceID(),

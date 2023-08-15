@@ -162,7 +162,7 @@ public abstract class RestServerEndpoint implements AutoCloseableAsync {
 
     /**
      * Starts this REST server endpoint.
-     *
+     * // TODO_LL : 初始化一堆handle 组件，启动netty 服务，绑定这些 handle 到 netty 服务，这些handle 通过一个路由器管理
      * @throws Exception if we cannot start the RestServerEndpoint
      */
     public final void start() throws Exception {
@@ -229,7 +229,7 @@ public abstract class RestServerEndpoint implements AutoCloseableAsync {
                                     .addLast(new PipelineErrorHandler(log, responseHeaders));
                         }
                     };
-
+            // TODO_LL : 启动netty
             NioEventLoopGroup bossGroup =
                     new NioEventLoopGroup(
                             1, new ExecutorThreadFactory("flink-rest-server-netty-boss"));

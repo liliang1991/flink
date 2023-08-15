@@ -129,7 +129,13 @@ public class HeartbeatServices {
 
         int failedRpcRequestsUntilUnreachable =
                 configuration.get(HeartbeatManagerOptions.HEARTBEAT_RPC_FAILURE_THRESHOLD);
-
+        /**
+         *  TODO_LL :具体的心跳服务组件有两个
+                    1：HeartbeatManager（）（心跳接受方）
+                    2：createHeartbeatManagerSender（）（心跳发送方）
+             flink 有三个组件，他们两两之间都有心跳
+             1：ResourceManager 2:JobMaster 3:taskExecutor
+         */
         return new HeartbeatServices(
                 heartbeatInterval, heartbeatTimeout, failedRpcRequestsUntilUnreachable);
     }

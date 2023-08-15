@@ -104,6 +104,8 @@ public class ZooKeeperLeaderElectionDriver implements LeaderElectionDriver, Lead
 
         leaderLatchPath = ZooKeeperUtils.generateLeaderLatchPath(path);
         leaderLatch = new LeaderLatch(client, leaderLatchPath);
+        // TODO_LL : 创建treecache 来执行监听
+
         this.cache =
                 ZooKeeperUtils.createTreeCache(
                         client,
@@ -111,6 +113,8 @@ public class ZooKeeperLeaderElectionDriver implements LeaderElectionDriver, Lead
                         this::retrieveLeaderInformationFromZooKeeper);
 
         running = true;
+        // TODO_LL :如果选举成功,则回调 isleader()
+        //          如果选举失败,则回调 noleader()
 
         leaderLatch.addListener(this);
         leaderLatch.start();

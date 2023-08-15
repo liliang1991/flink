@@ -237,9 +237,17 @@ public abstract class ClusterEntrypoint implements AutoCloseableAsync, FatalErro
         return SecurityUtils.getInstalledContext();
     }
 
+    /**
+     * 初始化各种公共组件
+     *
+     * @param configuration
+     * @param pluginManager
+     * @throws Exception
+     */
     private void runCluster(Configuration configuration, PluginManager pluginManager)
             throws Exception {
         synchronized (lock) {
+          // 初始化各种公共组件
             initializeServices(configuration, pluginManager);
 
             // write host information into configuration
@@ -250,6 +258,13 @@ public abstract class ClusterEntrypoint implements AutoCloseableAsync, FatalErro
                     dispatcherResourceManagerComponentFactory =
                             createDispatcherResourceManagerComponentFactory(configuration);
 
+
+            /**
+             * TODO_LL :创建三大组件的工厂实例
+             *          1：Dispatcher
+             *          2:WebMonitorEndpoint
+             *          3：ResourceManager
+             */
             clusterComponent =
                     dispatcherResourceManagerComponentFactory.create(
                             configuration,
@@ -318,6 +333,7 @@ public abstract class ClusterEntrypoint implements AutoCloseableAsync, FatalErro
             haServices = createHaServices(configuration, ioExecutor, rpcSystem);
             blobServer = new BlobServer(configuration, haServices.createBlobStore());
             blobServer.start();
+            // TODO_LL :心跳化服务初始化，初始化两个参数（1:心跳间隔时间10s  2:心跳超时时间50s）
             heartbeatServices = createHeartbeatServices(configuration);
             metricRegistry = createMetricRegistry(configuration, pluginManager, rpcSystem);
 

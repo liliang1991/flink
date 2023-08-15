@@ -85,6 +85,10 @@ public class DefaultLeaderElectionService
 
         synchronized (lock) {
             leaderContender = contender;
+            /**
+             *  TODO_LL : 进行选举
+
+             */
             leaderElectionDriver =
                     leaderElectionDriverFactory.createLeaderElectionDriver(
                             this,

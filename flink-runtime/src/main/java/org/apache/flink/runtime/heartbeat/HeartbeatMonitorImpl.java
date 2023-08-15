@@ -152,6 +152,14 @@ public class HeartbeatMonitorImpl<O> implements HeartbeatMonitor<O>, Runnable {
     public void run() {
         // The heartbeat has timed out if we're in state running
         if (state.compareAndSet(State.RUNNING, State.TIMEOUT)) {
+            /**
+             *  TODO_LL :心跳超时处理
+             *           如果一个从节点 50s 也没有给ResourceManager 发送心跳
+             *           ResourceManager 会关闭 和这个taskExecutor 的连接
+             *           假设 这个 taskExecutor 还有没执行完的 Executor，会关闭这个task,做这个task 的 failover,转以到 另一个 taskExecutor 执行
+             *        task 级别的容错：FailoverStategy
+             *        job 级别容错：RestartStategy
+             */
             heartbeatListener.notifyHeartbeatTimeout(resourceID);
         }
     }

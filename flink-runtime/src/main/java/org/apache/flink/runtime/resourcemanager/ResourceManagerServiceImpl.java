@@ -116,8 +116,15 @@ public class ResourceManagerServiceImpl implements ResourceManagerService, Leade
         }
 
         LOG.info("Starting resource manager service.");
-
+        /**
+         * TODO_LL : 1:leaderElectionService=DefaultLeaderElectionService
+         *           2:调用start 选举/注册，选举失败调用 LeaderContender 的某个方法
+         *             LeaderContender 有四个 dispatcher+resourceManager + webMonitorEndpoint+ jobmaster
+         */
         leaderElectionService.start(this);
+        /**
+         * TODO_LL : 如果选举成功调用  ZooKeeperLeaderElectionDriver.onGrantLeadership()
+         */
     }
 
     @Override
@@ -247,9 +254,14 @@ public class ResourceManagerServiceImpl implements ResourceManagerService, Leade
 
     @GuardedBy("lock")
     private void startNewLeaderResourceManager(UUID newLeaderSessionID) throws Exception {
+        // TODO_LL : 关闭
         stopLeaderResourceManager();
 
         this.leaderSessionID = newLeaderSessionID;
+        // TODO_LL :创建ResourceManager
+        //           1：Standalone 模式下是 StandaloneResourceManager
+        //           2：onyarn 模式下是 ActiveResourceManager
+
         this.leaderResourceManager =
                 resourceManagerFactory.createResourceManager(
                         rmProcessContext, newLeaderSessionID, ResourceID.generate());
@@ -260,6 +272,8 @@ public class ResourceManagerServiceImpl implements ResourceManagerService, Leade
                 .thenComposeAsync(
                         (ignore) -> {
                             synchronized (lock) {
+                                // TODO_LL : 启动
+
                                 return startResourceManagerIfIsLeader(newLeaderResourceManager);
                             }
                         },
@@ -282,6 +296,7 @@ public class ResourceManagerServiceImpl implements ResourceManagerService, Leade
     private CompletableFuture<Boolean> startResourceManagerIfIsLeader(
             ResourceManager<?> resourceManager) {
         if (isLeader(resourceManager)) {
+            // TODO_LL :启动RpcEndpoint 组件
             resourceManager.start();
             forwardTerminationFuture(resourceManager);
             return resourceManager.getStartedFuture().thenApply(ignore -> true);

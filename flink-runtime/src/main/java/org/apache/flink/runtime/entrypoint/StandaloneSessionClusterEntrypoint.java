@@ -25,7 +25,20 @@ import org.apache.flink.runtime.util.EnvironmentInformation;
 import org.apache.flink.runtime.util.JvmShutdownSafeguard;
 import org.apache.flink.runtime.util.SignalHandler;
 
-/** Entry point for the standalone session cluster. */
+/** Entry point for the standalone session cluster
+ ** ClusterEntrypoint 会启动三个组件
+ *   1：Dispatcher
+ *   2:WebMonitorEndpoint
+ *   3：ResourceManager
+ *
+ *   ResourceManager 有两种实现
+ *   1:standalone 实现: StandaloneResourceManager
+ *   2：on yarn 实现 ActiveResourceManager
+ *   实现区别
+ *   StandaloneResourceManager： 节点是固定的
+ *   ActiveResourceManager：他的节点是不固定的，如果这个solt 资源不够，则ActiveResourceManager 会向yarn 的 RM 申请 container
+ *   来启动taskmanager,solt 资源就增加了，这种模式下，taskmanager 的资源和数量是动态的
+ * . */
 public class StandaloneSessionClusterEntrypoint extends SessionClusterEntrypoint {
 
     public StandaloneSessionClusterEntrypoint(Configuration configuration) {
@@ -51,11 +64,12 @@ public class StandaloneSessionClusterEntrypoint extends SessionClusterEntrypoint
                         args,
                         new EntrypointClusterConfigurationParserFactory(),
                         StandaloneSessionClusterEntrypoint.class);
+        // 解析配置文件 master ,worker,zoo,cfg,flink-conf.yml
         Configuration configuration = loadConfiguration(entrypointClusterConfiguration);
 
         StandaloneSessionClusterEntrypoint entrypoint =
                 new StandaloneSessionClusterEntrypoint(configuration);
-
+       //主节点启动
         ClusterEntrypoint.runClusterEntrypoint(entrypoint);
     }
 }

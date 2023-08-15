@@ -36,7 +36,10 @@ final class DispatcherRunnerLeaderElectionLifecycleManager<
             T dispatcherRunner, LeaderElectionService leaderElectionService) throws Exception {
         this.dispatcherRunner = dispatcherRunner;
         this.leaderElectionService = leaderElectionService;
+        /**
+         *  TODO_LL : 执行 dispatcherRunner 的选举，最终会回调  dispatcherRunner 的 grantLeadership()
 
+         */
         leaderElectionService.start(dispatcherRunner);
     }
 

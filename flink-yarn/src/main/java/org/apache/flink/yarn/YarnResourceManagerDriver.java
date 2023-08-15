@@ -159,18 +159,29 @@ public class YarnResourceManagerDriver extends AbstractResourceManagerDriver<Yar
     //  ResourceManagerDriver
     // ------------------------------------------------------------------------
 
+    /**
+     *
+     * @throws Exception
+     *   TODO_LL :yarn 提供了一个客户端组件AmrmClientAsyncimpl()，内部包含了一个yarnclient
+     *            1：初始化启动
+     *            2：registerApplicationMaster() 启动ApplicationMaster
+     *            3：getContainersFromPreviousAttempts（） 需要YarnContainerEventHandler
+     */
     @Override
     protected void initializeInternal() throws Exception {
         final YarnContainerEventHandler yarnContainerEventHandler = new YarnContainerEventHandler();
         try {
+            // TODO_LL : 创建连接yarn RM 的 客户端
+
             resourceManagerClient =
                     yarnResourceManagerClientFactory.createResourceManagerClient(
                             yarnHeartbeatIntervalMillis, yarnContainerEventHandler);
             resourceManagerClient.init(yarnConfig);
             resourceManagerClient.start();
-
+            // TODO_LL :注册 ApplicationMaster ，包含Container 申请(发送rpc 请求给yarn 的RM,)
             final RegisterApplicationMasterResponse registerApplicationMasterResponse =
                     registerApplicationMaster();
+            // TODO_LL : 处理Container申请的 响应，用来处理启动从节点(taskManager)
             getContainersFromPreviousAttempts(registerApplicationMasterResponse);
             taskExecutorProcessSpecContainerResourcePriorityAdapter =
                     new TaskExecutorProcessSpecContainerResourcePriorityAdapter(

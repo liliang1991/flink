@@ -58,6 +58,7 @@ class DefaultDispatcherGatewayServiceFactory
 
         final Dispatcher dispatcher;
         try {
+            // TODO_LL :创建dispatcher
             dispatcher =
                     dispatcherFactory.createDispatcher(
                             rpcService,
@@ -70,7 +71,7 @@ class DefaultDispatcherGatewayServiceFactory
         } catch (Exception e) {
             throw new FlinkRuntimeException("Could not create the Dispatcher rpc endpoint.", e);
         }
-
+        // TODO_LL :启动dispatcher,其实就是启动 Dispatcher 类的onStart()（dispatcher 是一个 RpcEndpoint）
         dispatcher.start();
 
         return DefaultDispatcherGatewayService.from(dispatcher);

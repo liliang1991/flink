@@ -89,7 +89,7 @@ public class DispatcherRestEndpoint extends WebMonitorEndpoint<DispatcherGateway
         // Add the Dispatcher specific handlers
 
         final Time timeout = restConfiguration.getTimeout();
-
+        // TODO_LL :处理客户端 （flink run） 提交一个job 的 handle,
         JobSubmitHandler jobSubmitHandler =
                 new JobSubmitHandler(
                         leaderRetriever, timeout, responseHeaders, executor, clusterConfiguration);

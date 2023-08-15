@@ -75,13 +75,23 @@ public class HeartbeatManagerSenderImpl<I, O> extends HeartbeatManagerImpl<I, O>
                 heartbeatMonitorFactory);
 
         this.heartbeatPeriod = heartbeatPeriod;
+        // TODO_LL :启动一个定时任务，立马执行this 这个任务
         mainThreadExecutor.schedule(this, 0L, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * 每隔10s 执行一次循环
+     */
     @Override
     public void run() {
         if (!stopped) {
             log.debug("Trigger heartbeat request.");
+            /**
+             *  TODO_LL :1:给所有的心跳组件发送rpc 请求
+             *            ResourceManager 给所有注册成功的从节点（taskExecutor）发送 requestHeartbeat 这个rpc请求
+             *            ResourceManager 给所有注册成功的主节点（jobMaster）发送 requestHeartbeat 这个rpc请求
+             *            jobMaster 给所有注册成功的从节点（taskExecutor）发送 requestHeartbeat 这个rpc请求
+             */
             for (HeartbeatMonitor<O> heartbeatMonitor : getHeartbeatTargets().values()) {
                 requestHeartbeat(heartbeatMonitor);
             }
@@ -91,6 +101,10 @@ public class HeartbeatManagerSenderImpl<I, O> extends HeartbeatManagerImpl<I, O>
     }
 
     private void requestHeartbeat(HeartbeatMonitor<O> heartbeatMonitor) {
+        /**
+         *  TODO_LL :每个角色注册成功的时候，会在对应的管理组件中生成一个HeartbeatTarget
+
+         */
         O payload = getHeartbeatListener().retrievePayload(heartbeatMonitor.getHeartbeatTargetId());
         final HeartbeatTarget<O> heartbeatTarget = heartbeatMonitor.getHeartbeatTarget();
 

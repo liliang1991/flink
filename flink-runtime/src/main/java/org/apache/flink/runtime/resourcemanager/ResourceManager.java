@@ -215,6 +215,8 @@ public abstract class ResourceManager<WorkerType extends ResourceIDRetrievable>
     public final void onStart() throws Exception {
         try {
             log.info("Starting the resource manager.");
+            // TODO_LL : 启动ResourceManager 中的服务（SlotManager， JobLeaderIdService）
+
             startResourceManagerServices();
             startedFuture.complete(null);
         } catch (Throwable t) {
@@ -229,15 +231,20 @@ public abstract class ResourceManager<WorkerType extends ResourceIDRetrievable>
 
     private void startResourceManagerServices() throws Exception {
         try {
+            // TODO_LL :job master 启动出现问题，则回调 JobLeaderIdActionsImpl()
             jobLeaderIdService.start(new JobLeaderIdActionsImpl());
 
             registerMetrics();
-
+            // TODO_LL 启动心跳服务
             startHeartbeatServices();
+            // TODO_LL 启动 slotManager
+            // TODO_LL : 启动定时任务（从节点心跳超时和资源申请超时）
+            // TODO_LL : 关于slotManager 的两种实现 1：声明式的（默认） 2：细粒度的（需要通过开关控制）
 
             slotManager.start(
                     getFencingToken(), getMainThreadExecutor(), new ResourceActionsImpl());
-
+            // TODO_LL :Standalone 模式下什么也不做
+            //          on yarn 模式做了一些事
             initialize();
         } catch (Exception e) {
             handleStartResourceManagerServicesException(e);
@@ -1279,7 +1286,7 @@ public abstract class ResourceManager<WorkerType extends ResourceIDRetrievable>
     }
 
     private class JobLeaderIdActionsImpl implements JobLeaderIdActions {
-
+        // TODO_LL :jobmaster 地址发生改变
         @Override
         public void jobLeaderLostLeadership(final JobID jobId, final JobMasterId oldJobMasterId) {
             runAsync(
@@ -1290,7 +1297,7 @@ public abstract class ResourceManager<WorkerType extends ResourceIDRetrievable>
                         }
                     });
         }
-
+        // TODO_LL :启动超时
         @Override
         public void notifyJobTimeout(final JobID jobId, final UUID timeoutId) {
             runAsync(
@@ -1306,6 +1313,7 @@ public abstract class ResourceManager<WorkerType extends ResourceIDRetrievable>
                         }
                     });
         }
+       // TODO_LL : 启动过程中发生异常
 
         @Override
         public void handleError(Throwable error) {

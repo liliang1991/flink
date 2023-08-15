@@ -157,6 +157,8 @@ public class DefaultDispatcherResourceManagerComponentFactory
                                     dispatcherGatewayRetriever,
                                     executor);
 
+            // TODO_LL :创建启动组件 webMonitorEndpoint
+
             webMonitorEndpoint =
                     restEndpointFactory.createRestEndpoint(
                             configuration,
@@ -172,6 +174,7 @@ public class DefaultDispatcherResourceManagerComponentFactory
             webMonitorEndpoint.start();
 
             final String hostname = RpcUtils.getHostname(rpcService);
+            // TODO_LL :创建组件 resourceManagerService
 
             resourceManagerService =
                     ResourceManagerServiceImpl.create(
@@ -208,6 +211,16 @@ public class DefaultDispatcherResourceManagerComponentFactory
                             ioExecutor);
 
             log.debug("Starting Dispatcher.");
+            //
+            /**
+             * TODO_LL : 创建启动组件 dispatcherRunner,大概工作机制如下
+             *           1：维护job 状态
+             *           2：执行 job 的注册
+             *           3：回复job 执行
+             *           4：为job 拉起jobMaster
+             *
+             */
+
             dispatcherRunner =
                     dispatcherRunnerFactory.createDispatcherRunner(
                             highAvailabilityServices.getDispatcherLeaderElectionService(),
@@ -226,9 +239,13 @@ public class DefaultDispatcherResourceManagerComponentFactory
             return new DispatcherResourceManagerComponent(
                     dispatcherRunner,
                     resourceManagerService,
+
+                     // TODO_LL :dispatcher 检索服务
                     dispatcherLeaderRetrievalService,
+                    // TODO_LL :resourceManager 检索服务
                     resourceManagerRetrievalService,
                     webMonitorEndpoint,
+                    // TODO_LL :异常处理器
                     fatalErrorHandler);
 
         } catch (Exception exception) {

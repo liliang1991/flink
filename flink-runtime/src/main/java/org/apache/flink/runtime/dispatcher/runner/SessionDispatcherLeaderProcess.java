@@ -72,10 +72,13 @@ public class SessionDispatcherLeaderProcess extends AbstractDispatcherLeaderProc
 
     @Override
     protected void onStart() {
+        // TODO_LL :启动 jobGraphStore
         startServices();
 
         onGoingRecoveryOperation =
+                // TODO_LL :恢复job 信息
                 recoverJobsAsync()
+                        // TODO_LL :创建启动 Dispatcher
                         .thenAccept(this::createDispatcherIfRunning)
                         .handle(this::onErrorIfRunning);
     }
@@ -115,9 +118,13 @@ public class SessionDispatcherLeaderProcess extends AbstractDispatcherLeaderProc
 
     private Collection<JobGraph> recoverJobs() {
         log.info("Recover all persisted job graphs.");
+        /**
+         *  TODO_LL :集群停止之前未完成的jobid
+
+         */
         final Collection<JobID> jobIds = getJobIds();
         final Collection<JobGraph> recoveredJobGraphs = new ArrayList<>();
-
+        // TODO_LL :恢复job 信息，不是恢复执行
         for (JobID jobId : jobIds) {
             recoveredJobGraphs.add(recoverJob(jobId));
         }
@@ -138,6 +145,7 @@ public class SessionDispatcherLeaderProcess extends AbstractDispatcherLeaderProc
     private JobGraph recoverJob(JobID jobId) {
         log.info("Trying to recover job with job id {}.", jobId);
         try {
+            // TODO_LL :从jobGraphStore 中恢复 jobGraphStore 的实现 在ha 集群中 是基于ZK 实现的，所以job 的信息存储在zk中
             return jobGraphStore.recoverJobGraph(jobId);
         } catch (Exception e) {
             throw new FlinkRuntimeException(

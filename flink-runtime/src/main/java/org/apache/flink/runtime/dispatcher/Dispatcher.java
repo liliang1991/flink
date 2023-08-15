@@ -132,7 +132,8 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
 
     private final Executor ioExecutor;
 
-    @Nullable private final String metricServiceQueryAddress;
+    @Nullable
+    private final String metricServiceQueryAddress;
 
     private final Map<JobID, CompletableFuture<Void>> jobManagerRunnerTerminationFutures;
 
@@ -206,6 +207,7 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
     @Override
     public void onStart() throws Exception {
         try {
+            // TODO_LL :启动一些组件
             startDispatcherServices();
         } catch (Throwable t) {
             final DispatcherException exception =
@@ -214,7 +216,9 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
             onFatalError(exception);
             throw exception;
         }
-
+        /**
+         *  TODO_LL :恢复执行集群停止前未完成的job
+         */
         startRecoveredJobs();
         this.dispatcherBootstrap =
                 this.dispatcherBootstrapFactory.create(
@@ -225,6 +229,7 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
 
     private void startDispatcherServices() throws Exception {
         try {
+
             registerDispatcherMetrics(jobManagerMetricGroup);
         } catch (Exception e) {
             handleStartDispatcherServicesException(e);
@@ -306,7 +311,7 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
                 final DuplicateJobSubmissionException exception =
                         isInGloballyTerminalState(jobGraph.getJobID())
                                 ? DuplicateJobSubmissionException.ofGloballyTerminated(
-                                        jobGraph.getJobID())
+                                jobGraph.getJobID())
                                 : DuplicateJobSubmissionException.of(jobGraph.getJobID());
                 return FutureUtils.completedExceptionally(exception);
             } else if (isPartialResourceConfigured(jobGraph)) {
@@ -327,7 +332,9 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
      * Checks whether the given job has already been submitted or executed.
      *
      * @param jobId identifying the submitted job
+     *
      * @return true if the job has already been submitted (is running) or has been executed
+     *
      * @throws FlinkException if the job scheduling status cannot be retrieved
      */
     private boolean isDuplicateJob(JobID jobId) throws FlinkException {
@@ -338,7 +345,9 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
      * Checks whether the given job has already been executed.
      *
      * @param jobId identifying the submitted job
+     *
      * @return true if the job has already finished, either successfully or as a failure
+     *
      * @throws FlinkException if the job scheduling status cannot be retrieved
      */
     private boolean isInGloballyTerminalState(JobID jobId) throws FlinkException {
@@ -405,9 +414,13 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
         runJob(jobGraph, ExecutionType.SUBMISSION);
     }
 
+    /**
+     * TODO_LL : 恢复job,或者提交job
+     */
     private void runJob(JobGraph jobGraph, ExecutionType executionType) throws Exception {
         Preconditions.checkState(!runningJobs.containsKey(jobGraph.getJobID()));
         long initializationTimestamp = System.currentTimeMillis();
+        // TODO_LL :启动jobMaster
         JobManagerRunner jobManagerRunner =
                 createJobManagerRunner(jobGraph, initializationTimestamp);
 
@@ -668,7 +681,7 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
 
     @Override
     public CompletableFuture<Collection<Tuple2<ResourceID, String>>>
-            requestTaskManagerMetricQueryServiceAddresses(Time timeout) {
+    requestTaskManagerMetricQueryServiceAddresses(Time timeout) {
         return runResourceManagerCommand(
                 resourceManagerGateway ->
                         resourceManagerGateway.requestTaskManagerMetricQueryServiceAddresses(
@@ -749,7 +762,7 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
     private CompletableFuture<Void> removeJob(JobID jobId, CleanupJobState cleanupJobState) {
         final JobManagerRunner job = checkNotNull(runningJobs.remove(jobId));
         return CompletableFuture.supplyAsync(
-                        () -> cleanUpJobGraph(jobId, cleanupJobState.cleanupHAData), ioExecutor)
+                () -> cleanUpJobGraph(jobId, cleanupJobState.cleanupHAData), ioExecutor)
                 .thenCompose(
                         jobGraphRemoved -> job.closeAsync().thenApply(ignored -> jobGraphRemoved))
                 .thenAcceptAsync(
@@ -762,9 +775,10 @@ public abstract class Dispatcher extends PermanentlyFencedRpcEndpoint<Dispatcher
      *
      * @param jobId Reference to the job that we want to clean.
      * @param cleanupHA Flag signalling whether we should remove (we're done with the job) or just
-     *     release the job graph.
+     *         release the job graph.
+     *
      * @return True if we have removed the job graph. This means we can clean other HA-related
-     *     services as well.
+     *         services as well.
      */
     private boolean cleanUpJobGraph(JobID jobId, boolean cleanupHA) {
         if (cleanupHA) {

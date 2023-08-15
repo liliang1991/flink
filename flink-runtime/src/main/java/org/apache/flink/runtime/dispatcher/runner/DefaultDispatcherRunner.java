@@ -109,16 +109,27 @@ public final class DefaultDispatcherRunner implements DispatcherRunner, LeaderCo
                             getClass().getSimpleName(),
                             leaderSessionID,
                             DispatcherLeaderProcess.class.getSimpleName());
+                    /**
+                     * TODO_LL :创建启动 DispatcherRunner
+                     */
                     startNewDispatcherLeaderProcess(leaderSessionID);
                 });
     }
 
     private void startNewDispatcherLeaderProcess(UUID leaderSessionID) {
+        // TODO_LL :先停止已有的服务
         stopDispatcherLeaderProcess();
+        /**
+         * TODO_LL :DispatcherLeaderProcess=SessionDispatcherLeaderProcess
 
+         */
         dispatcherLeaderProcess = createNewDispatcherLeaderProcess(leaderSessionID);
 
         final DispatcherLeaderProcess newDispatcherLeaderProcess = dispatcherLeaderProcess;
+        /**
+         * TODO_LL : 启动 SessionDispatcherLeaderProcess
+
+         */
         FutureUtils.assertNoException(
                 previousDispatcherLeaderProcessTerminationFuture.thenRun(
                         newDispatcherLeaderProcess::start));
@@ -221,6 +232,10 @@ public final class DefaultDispatcherRunner implements DispatcherRunner, LeaderCo
         final DefaultDispatcherRunner dispatcherRunner =
                 new DefaultDispatcherRunner(
                         leaderElectionService, fatalErrorHandler, dispatcherLeaderProcessFactory);
+        /**
+         *  TODO_LL :被包装，提供了声明周期管理
+
+         */
         return DispatcherRunnerLeaderElectionLifecycleManager.createFor(
                 dispatcherRunner, leaderElectionService);
     }
